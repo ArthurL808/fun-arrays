@@ -1,14 +1,18 @@
-var dataset = require('./dataset.json');
+var dataset = require("./dataset.json");
 
 /*
   create an array with accounts from bankBalances that are
   greater than 100000
   assign the resulting new array to `hundredThousandairs`
 */
-var hundredThousandairs = null;
+var hundredThousandairs = dataset.bankBalances.filter(function(e) {
+  return parseInt(e.amount) > 100000;
+});
 
 // set sumOfBankBalances to be the sum of all value held at `amount` for each bank object
-var sumOfBankBalances = null;
+var sumOfBankBalances = dataset.bankBalances.reduce(function(acc, cur) {
+  return acc + parseInt(cur.amount);
+}, 0);
 
 /*
   from each of the following states:
@@ -21,8 +25,16 @@ var sumOfBankBalances = null;
   take each `amount` and add 18.9% interest to it rounded to the nearest dollar 
   and then sum it all up into one value saved to `sumOfInterests`
  */
-var sumOfInterests = null;
 
+var sumOfInterests = dataset.bankBalances.filter(states).map(intrest).reduce(function (acc,cur) {
+  return acc + cur
+});
+function intrest(e) {
+  return Math.round(parseInt(e.amount) * .189)
+}
+function states(e) {
+  return e.state === "WI" || e.state === "IL" || e.state === "WY" || e.state === "OH" || e.state === "GA" || e.state === "DE";
+}
 /*
   aggregate the sum of bankBalance amounts
   grouped by state
@@ -39,8 +51,14 @@ var sumOfInterests = null;
     round this number to the nearest dollar before moving on.
   )
  */
-var stateSums = null;
-
+var stateSums = dataset.bankBalances.reduce(function (acc,cur) {
+if(cur.state in acc){
+  acc[cur.state] += parseInt(cur.amount)
+} else{
+  acc[cur.state] = parseInt(cur.amount)
+}
+return acc
+},{})
 /*
   for all states *NOT* in the following states:
     Wisconsin
@@ -58,7 +76,21 @@ var stateSums = null;
     round this number to the nearest dollar before moving on.
   )
  */
-var sumOfHighInterests = null;
+debugger;
+var sumOfHighInterests = dataset.bankBalances.filter(function (e) {
+  return !["WI",'IL','WY','OH',"GA","DE"].includes(e.state) 
+}).reduce(function (acc,cur) {
+  var stateSumIntrest = Math.round(stateSums[cur.state] * .189) 
+  if(cur.state in stateSums){
+    if(stateSumIntrest > 50000){
+      acc += stateSumIntrest
+    }
+  }
+  return acc
+},0)
+
+
+
 
 /*
   set `lowerSumStates` to be an array of two letter state
@@ -106,15 +138,14 @@ var areStatesInHigherStateSum = null;
  */
 var anyStatesInHigherStateSum = null;
 
-
 module.exports = {
-  hundredThousandairs : hundredThousandairs,
-  sumOfBankBalances : sumOfBankBalances,
-  sumOfInterests : sumOfInterests,
-  sumOfHighInterests : sumOfHighInterests,
-  stateSums : stateSums,
-  lowerSumStates : lowerSumStates,
-  higherStateSums : higherStateSums,
-  areStatesInHigherStateSum : areStatesInHigherStateSum,
-  anyStatesInHigherStateSum : anyStatesInHigherStateSum
+  hundredThousandairs: hundredThousandairs,
+  sumOfBankBalances: sumOfBankBalances,
+  sumOfInterests: sumOfInterests,
+  sumOfHighInterests: sumOfHighInterests,
+  stateSums: stateSums,
+  lowerSumStates: lowerSumStates,
+  higherStateSums: higherStateSums,
+  areStatesInHigherStateSum: areStatesInHigherStateSum,
+  anyStatesInHigherStateSum: anyStatesInHigherStateSum
 };
